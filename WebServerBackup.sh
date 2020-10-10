@@ -22,3 +22,35 @@ BKP="WebServerBackup"-"$DATE"
 # criando as variaveis do log
 DESTDIR2=/var/log
 LOG=BACKUPWebServer-"$DATE".log
+
+# gerando o arquivo de log
+exec &> >(tee -a /$DESTDIR2/$LOG)
+    exec 2>&1
+
+# procedimento de backup baseado no SO identificado
+if [ $SO = Debian ];
+    then
+        echo -e "Sistema operacional Debian detectado\nIniciando o backup do Apache2"
+        echo
+        /bin/tar -zcvf /$DESTDIR1/"$BKP".tar.gz /etc/apache2 /var/log/apache2 /var/www
+	if [ $? = 0 ];
+		then
+			echo "BACKUP REALIZADO COM SUCESSO" >> /$DESTDIR2/"$LOG"
+		else
+			echo "ERRO BACKUP NAO REALIZADO" >> /$DESTDIR2/"$LOG"
+	fi
+elif [ $SO = CentOS ];
+    then
+        echo -e "Sistema operacional CentOS detectado\nIniciando o backup do HTTPD"
+        echo
+        /usr/bin/tar -zcvf /$DESTDIR1/"$BKP".tar.gz /etc/httpd /var/log/httpd /var/www
+    if [ $? = 0 ];
+		then
+			echo "BACKUP REALIZADO COM SUCESSO" >> /$DESTDIR2/$LOG
+		else
+			echo "ERRO BACKUP NAO REALIZADO" >> /$DESTDIR2/$LOG
+	fi
+else
+    echo -e "ESTE SCRITP NAO RODA NO SEU SISTEMA OPERACIONAL\nENTRE EM CONTATO COM O SUPORTE"
+    echo
+fi
